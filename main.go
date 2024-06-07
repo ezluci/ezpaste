@@ -4,19 +4,19 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"net/url"
-	
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+const Version = "0.1.2"
 
 func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 
 	router.Get("/", mainPage)
-	router.Get("/upload", uploadPaste)
+	router.Post("/upload", uploadPaste)
 	// router.Get("/admin", admin)
 	router.Get("/{pasteId}", getPaste)
 
@@ -26,7 +26,7 @@ func main() {
 
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, path.Join("html", "index.html"));
+	http.ServeFile(w, r, path.Join("html", "index.html"))
 }
 
 
@@ -47,19 +47,19 @@ func getPaste(w http.ResponseWriter, r *http.Request) {
 
 
 func generatePasteName() string {
-	return genRandomString(5);
+	return genRandomString(5)
 }
 
 
 func uploadPaste(w http.ResponseWriter, r *http.Request) {
 
-	m, err := url.ParseQuery(r.URL.RawQuery)
-	if err != nil || len(m["text"]) == 0 || len(m["text"][0]) == 0 {
+	err := r.ParseForm()
+	if err != nil || len(r.PostForm) == 0 || len(r.PostForm["text"][0]) == 0 {
 		http.Redirect(w, r, "", http.StatusBadRequest)
 		return
 	}
 
-	text := []byte(m["text"][0])
+	text := []byte(r.PostForm["text"][0])
 
 	var name string
 
@@ -75,7 +75,7 @@ func uploadPaste(w http.ResponseWriter, r *http.Request) {
 	// create folder 'pastes'
 	_, err = os.Stat("pastes")
 	if err != nil {
-		os.Mkdir("pastes", 0750);
+		os.Mkdir("pastes", 0750)
 	}
 
 	err = os.WriteFile(path.Join("pastes", name), text, 0644)

@@ -22,8 +22,8 @@ func genRandomString(count int) string {
 	
 	ans := ""
 	for i := 0; i < count; i += 1 {
-		ans += string( az09_chars[rand.Int31n(10 + 26)] );
+		ans += string( az09_chars[rand.Int31n(10 + 26)] )
 	}
 
-	return ans;
+	return ans
 }
