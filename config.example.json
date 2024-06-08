@@ -1,8 +1,11 @@
 # this is an example config. the server reads the config from config.json.
 {
-   "httpPort": 4000,
-   "httpsPort": 4001,
-   "version": "0.0.1",
+   "version": "0.1.3",
+
+   "httpPort": "4000",
+
+   "httpsSupport": true,
+   "httpsPort": "4001",
    "certFilePath": "cert.pem",
    "keyFilePath": "key.pem"
 }

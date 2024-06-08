@@ -6,16 +6,18 @@ import (
 	"path"
 	"fmt"
 	"encoding/json"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 type Server struct {
-	HttpPort	int
-	HttpsPort int
 	Version	string
+
+	HttpPort	string
+
+	HttpsSupport bool
+	HttpsPort string
 	CertFilePath string
 	KeyFilePath string
 }
@@ -45,14 +47,18 @@ func main() {
 	router.Post("/upload", uploadPaste)
 	router.Get("/{pasteId}", getPaste)
 
-	go func() {
-		err := http.ListenAndServe(":" + strconv.Itoa(config.HttpPort), router)
-		if err != nil {
-			panic(err)
-		}	
-	}()
+	if config.HttpsSupport {
+		go func() {
+			fmt.Println("https on port " + config.HttpsPort)
+			err := http.ListenAndServeTLS(":" + config.HttpsPort, config.CertFilePath, config.KeyFilePath, router)
+			if err != nil {
+				panic(err)
+			}
+		}()
+	}
 
-	err := http.ListenAndServeTLS(":" + strconv.Itoa(config.HttpsPort), config.CertFilePath, config.KeyFilePath, router)
+	fmt.Println("http on port " + config.HttpPort)
+	err := http.ListenAndServe(":" + config.HttpPort, router)
 	if err != nil {
 		panic(err)
 	}
