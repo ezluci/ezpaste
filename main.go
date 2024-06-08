@@ -4,24 +4,58 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"fmt"
+	"encoding/json"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-const Version = "0.1.2"
+type Server struct {
+	HttpPort	int
+	HttpsPort int
+	Version	string
+	CertFilePath string
+	KeyFilePath string
+}
+
+func getConfig() Server {
+	file, err := os.Open("config.json")
+	if err != nil {
+		panic(err)
+	}
+	
+	var config Server
+	json.NewDecoder(file).Decode(&config)
+	
+	return config
+}
+
+
 
 func main() {
+	config := getConfig()
+	fmt.Println("ezpaste version " + config.Version)
+
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 
 	router.Get("/", mainPage)
 	router.Post("/upload", uploadPaste)
-	// router.Get("/admin", admin)
 	router.Get("/{pasteId}", getPaste)
 
+	go func() {
+		err := http.ListenAndServe(":" + strconv.Itoa(config.HttpPort), router)
+		if err != nil {
+			panic(err)
+		}	
+	}()
 
-	http.ListenAndServe(":4000", router)
+	err := http.ListenAndServeTLS(":" + strconv.Itoa(config.HttpsPort), config.CertFilePath, config.KeyFilePath, router)
+	if err != nil {
+		panic(err)
+	}
 }
 
 
