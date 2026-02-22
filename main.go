@@ -12,8 +12,8 @@ import (
 )
 
 type Server struct {
-	Version  string
-	HttpPort string
+	Version string
+	Address string
 }
 
 func getConfig() Server {
@@ -39,8 +39,8 @@ func main() {
 	router.Post("/upload", uploadPaste)
 	router.Get("/{pasteId}", getPaste)
 
-	fmt.Println("http on port: " + config.HttpPort)
-	err := http.ListenAndServe(":"+config.HttpPort, router)
+	fmt.Println("http on address: " + config.Address)
+	err := http.ListenAndServe(config.Address, router)
 	if err != nil {
 		panic(err)
 	}

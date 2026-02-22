@@ -1,5 +1,5 @@
 # this is an example config. the server reads the config from config.json.
 {
    "version": "0.1.3",
-   "httpPort": "4009"
+   "address": "0.0.0.0:4009"
 }
